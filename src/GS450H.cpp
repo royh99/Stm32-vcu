@@ -614,6 +614,8 @@ void GS450HClass::Task1Ms()
         //mg2 the MG2 values are now beside each other!
         htm_data[30]=(mg2_torque) & 0xFF; //positive is forward
         htm_data[31]=((mg2_torque)>>8) & 0xFF;
+        htm_data[36]=htm_data[30];
+        htm_data[37]=htm_data[31];
 
         if(scaledTorqueTarget > 0)
         {
@@ -634,24 +636,17 @@ void GS450HClass::Task1Ms()
         }
 
         //Battery Limits
-        /*
-                htm_data[85]=(-5000)&0xFF;  // regen ability of battery !!!increased
-                htm_data[86]=((-5000)>>8);
 
-                htm_data[87]=(-10000)&0xFF;  // discharge ability of battery !!!Remove negative and increased
-                htm_data[88]=((-10000)>>8);
-        */
-//Battery Limits = forced zero
-//40	4	75	12	60	251	52	4
+        htm_data[72]=40;
+        htm_data[73]=4;
+        htm_data[74]=75;
+        htm_data[75]=12;
 
-        htm_data[72]=0x40;
-        htm_data[73]=0x04;
-        htm_data[74]=0x75;
-        htm_data[75]=0x12;
-        htm_data[76]=0x60;
-        htm_data[77]=0x25;
-        htm_data[78]=0x52;
-        htm_data[79]=0x04;
+        htm_data[76]=(-2500)&0xFF;  // regen ability of battery
+        htm_data[77]=((-2500)>>8); // 25kW
+
+        htm_data[78]=(6000)&0xFF;  // discharge ability of battery
+        htm_data[79]=((6000)>>8); // 60kW
 
         htm_data[86]=137; //from start up
         htm_data[88]=137; //221 on start
