@@ -28,12 +28,8 @@
 
 static uint16_t Vbatt=0;
 static uint16_t VbattSP=0;
-static uint8_t counter_1db=0;
-static uint8_t counter_1dc=0;
-static uint8_t counter_11a_d6=0;
-static uint8_t counter_1d4=0;
-static uint8_t counter_1f2=0;
-static uint8_t counter_55b=0;
+static uint8_t mprun10=0;
+static uint8_t mprun100=0;
 static uint8_t OBCpwrSP=0;
 static uint8_t OBCpwr=0;
 static bool BMSspoofI = true;
@@ -117,7 +113,7 @@ void LeafINV::Task10Ms()
     }
 
     uint8_t bytes[8];
-
+    mprun10 = (mprun10 + 1) % 4;  // mprun10 cycles between 0-1-2-3-0-1...
 
     /////////////////////////////////////////////////////////////////////////////////////////////////
     // CAN Messaage 0x11A
@@ -161,28 +157,11 @@ void LeafINV::Task10Ms()
         {0xaa, 0x80},
     };
 
-
-
-    bytes[3] = weird_d34_values[counter_11a_d6][0];//0xAA;
-    bytes[4] = weird_d34_values[counter_11a_d6][1];//0xC0;
-
-    // Always 0x00 (LeafLogs, canmsgs)
-    bytes[5] = 0x00;
-
-    // A 2-bit counter
-    bytes[6] = counter_11a_d6;
-
-    counter_11a_d6++;
-    if(counter_11a_d6 >= 4)
-    {
-        counter_11a_d6 = 0;
-    }
-
-
-    // Extra CRC
-    nissan_crc(bytes, 0x85);//not sure if this is really working or just making me look like a muppet.
-
-
+    bytes[3] = weird_d34_values[mprun10][0];//0xAA;
+    bytes[4] = weird_d34_values[mprun10][1];//0xC0;
+    bytes[5] = 0x00;  // Always 0x00 (LeafLogs, canmsgs)
+    bytes[6] = mprun10;     // A 2-bit counter
+    bytes[7] = nissan_crc(bytes);
 
     can->Send(0x11A, (uint32_t*)bytes, 8);
 
@@ -229,12 +208,9 @@ void LeafINV::Task10Ms()
     //   3: Precharging (0.4%)
     //   5: Starting discharge (3x10ms) (2.0%)
     //   7: Precharged (93%)
-    bytes[4] = 0x07 | (counter_1d4 << 6);
-    //bytes[4] = 0x02 | (counter_1d4 << 6);
+    bytes[4] = 0x07 | (mprun10 << 6);
+    //bytes[4] = 0x02 | (mprun10 << 6);
     //Bit 2 is HV status. 0x00 No HV, 0x01 HV On.
-
-    counter_1d4++;
-    if(counter_1d4 >= 4) counter_1d4 = 0;
 
     // MSB nibble:
     //   0: 35-40ms at startup when gear is 0, then at shutdown 40ms
@@ -325,9 +301,7 @@ void LeafINV::Task10Ms()
     // 2016-24kWh-ev-on-drive-park-off.pcap #12101 / 15.63s
     // outFrame.data.bytes[6] = 0x01;
     //byte 6 brake signal
-
-    // Extra CRC
-    nissan_crc(bytes, 0x85);
+    bytes[7] = nissan_crc(bytes);
 
     can->Send(0x1D4, (uint32_t*)bytes, 8);//send on can1
 
@@ -356,41 +330,11 @@ void LeafINV::Task10Ms()
         bytes[3] = ((TMP_battV & 0xC0) | (0x2b)); //0x2b should give no cut req, main rly on permission,normal p limit.
         bytes[4] = 0x40;  //SOC for dash in Leaf. fixed val.
         bytes[5] = 0x00;
-        bytes[6] = counter_1db;
-
-
-
-        // Extra CRC in byte 7
-        nissan_crc(bytes, 0x85);
-
-
-        counter_1db++;
-        if(counter_1db >= 4) counter_1db = 0;
+        bytes[6] = mprun10;
+        bytes[7] = nissan_crc(bytes);
 
         can->Send(0x1DB, (uint32_t*)bytes, 8);
     }
-
-    /////////////////////////////////////////////////////////////////////////////////////////////////
-    // CAN Message 0x50B
-
-    // Statistics from 2016 capture:
-    //     10 00000000000000
-    //     21 000002c0000000
-    //    122 000000c0000000
-    //    513 000006c0000000
-
-    // Let's just send the most common one all the time
-    // FIXME: This is a very sloppy implementation. Thanks. I try:)
-    bytes[0] = 0x00;
-    bytes[1] = 0x00;
-    bytes[2] = 0x06;
-    bytes[3] = 0xc0;
-    bytes[4] = 0x00;
-    bytes[5] = 0x00;
-    bytes[6] = 0x00;
-
-    //possible problem here as 0x50B is DLC 7....
-    can->Send(0x50B, (uint32_t*)bytes, 7);
 
     if(BMSspoofI)
     {
@@ -406,13 +350,8 @@ void LeafINV::Task10Ms()
         bytes[3]=0xD5;
         bytes[4]=0x00;//may not need pairing code crap here...and we don't:)
         bytes[5]=0x00;
-        bytes[6]=counter_1dc;
-        // Extra CRC in byte 7
-        nissan_crc(bytes, 0x85);
-
-        counter_1dc++;
-        if (counter_1dc >= 4)
-            counter_1dc = 0;
+        bytes[6]=mprun10;
+        bytes[7] = nissan_crc(bytes);
 
         can->Send(0x1DC, (uint32_t*)bytes, 8);
     }
@@ -465,14 +404,8 @@ void LeafINV::Task10Ms()
     bytes[3] = 0xAC;
     bytes[4] = 0x00;
     bytes[5] = 0x3C;
-    bytes[6] = counter_1f2;
+    bytes[6] = mprun10;
     bytes[7] = 0x8F;  //may not need checksum here?
-
-    counter_1f2++;
-    if (counter_1f2 >= 4)
-    {
-        counter_1f2 = 0;
-    }
 
     can->Send(0x1F2, (uint32_t*)bytes, 8);
 }
@@ -482,12 +415,32 @@ void LeafINV::Task100Ms()
 
     // MSGS for charging with pdm
     uint8_t bytes[8];
+    mprun100 = (mprun100 + 1) % 4;  // mprun100 cycles between 0-1-2-3-0-1...
 
+    /////////////////////////////////////////////////////////////////////////////////////////////////
+    // CAN Message 0x50B - Normally sent from VCM on a LEAF
+
+    // Statistics from 2016 capture:
+    //     10 00000000000000
+    //     21 000002c0000000
+    //    122 000000c0000000
+    //    513 000006c0000000
+
+    bytes[0] = 0x00;
+    bytes[1] = 0x00;
+    bytes[2] = 0x06; //HCM_WakeUpSleepCommand == 11b == WakeUp
+    bytes[3] = 0xc0; //CANMASK = 1
+    bytes[4] = 0x00;
+    bytes[5] = 0x00;
+    bytes[6] = 0x00;
+
+    //possible problem here as 0x50B is DLC 7....
+    can->Send(0x50B, (uint32_t*)bytes, 7);
 
     if(BMSspoofI)
     {
         /////////////////////////////////////////////////////////////////////////////////////////////////
-        // CAN Message 0x55B:
+        // CAN Message 0x55B - Normally sent from BMS on a LEAF
 
         bytes[0] = 0xA4;
         bytes[1] = 0x40;
@@ -495,17 +448,13 @@ void LeafINV::Task100Ms()
         bytes[3] = 0x00;
         bytes[4] = 0xDF;
         bytes[5] = 0xC0;
-        bytes[6] = ((0x1 << 4) | (counter_55b));
-        // Extra CRC in byte 7
-        nissan_crc(bytes, 0x85);
-
-        counter_55b++;
-        if(counter_55b >= 4) counter_55b = 0;
+        bytes[6] = ((0x1 << 4) | (mprun100));
+        bytes[7] = nissan_crc(bytes);
 
         can->Send(0x55b, (uint32_t*)bytes, 8);
 
         /////////////////////////////////////////////////////////////////////////////////////////////////
-        // CAN Message 0x59E:
+        // CAN Message 0x59E - Normally sent from BMS on a LEAF
 
         bytes[0] = 0x00;//Static msg works fine here
         bytes[1] = 0x00;//Batt capacity for chg and qc.
@@ -519,7 +468,7 @@ void LeafINV::Task100Ms()
         can->Send(0x59e, (uint32_t*)bytes, 8);
 
         /////////////////////////////////////////////////////////////////////////////////////////////////
-        // CAN Message 0x5BC:
+        // CAN Message 0x5BC - Normally sent from BMS on a LEAF
 
         // muxed msg with info for gids etc. Will try static for a test.
         bytes[0] = 0x3D;//Static msg works fine here
@@ -548,21 +497,20 @@ int8_t LeafINV::fahrenheit_to_celsius(uint16_t fahrenheit)
 
 
 
-void LeafINV::nissan_crc(uint8_t *data, uint8_t polynomial)
+uint8_t LeafINV::nissan_crc(uint8_t *data)
 {
-    // We want to process 8 bytes with the 8th byte being zero
-    data[7] = 0;
     uint8_t crc = 0;
-    for(int b=0; b<8; b++)
-    {
-        for(int i=7; i>=0; i--)
-        {
-            uint8_t bit = ((data[b] &(1 << i)) > 0) ? 1 : 0;
-            if(crc >= 0x80)
+    uint8_t polynomial = 0x85;
+
+    for (int b = 0; b < 8; b++) {
+        uint8_t byte = (b == 7) ? 0 : data[b]; // Treat 8th byte as 0 during calculation.
+        for (int i = 7; i >= 0; i--) {
+            uint8_t bit = ((byte & (1 << i)) > 0) ? 1 : 0;
+            if (crc >= 0x80)
                 crc = (uint8_t)(((crc << 1) + bit) ^ polynomial);
             else
                 crc = (uint8_t)((crc << 1) + bit);
         }
     }
-    data[7] = crc;
+    return crc;
 }
