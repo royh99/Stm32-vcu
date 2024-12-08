@@ -517,7 +517,6 @@ void GS450HClass::Task1Ms()
 
         if(counter>100)
         {
-//HAL_GPIO_TogglePin(LED1_GPIO_Port, LED1_Pin );
             counter = 0;
         }
         else
@@ -637,21 +636,26 @@ void GS450HClass::Task1Ms()
 
         //Battery Limits
 
+        htm_data[22]=(-2500)&0xFF;  // possibly regen ability of battery
+        htm_data[23]=((-2500)>>8); // -25kW, 0xF63C 60, 246 Start values 136, 129, 0xF988, -1656 (16.56kW?)
+
+        htm_data[24]=(6000)&0xFF;  // possibly discharge ability of battery
+        htm_data[25]=((6000)>>8); //
+
         htm_data[72]=40;
         htm_data[73]=4;
         htm_data[74]=75;
         htm_data[75]=12;
 
-        htm_data[76]=(-2500)&0xFF;  // regen ability of battery
-        htm_data[77]=((-2500)>>8); // 25kW
+        htm_data[76]=(-2490)&0xFF;  // regen ability of battery
+        htm_data[77]=((-2490)>>8); // -24.9kW, 0xF646, 70, 246
 
-        htm_data[78]=(6000)&0xFF;  // discharge ability of battery
-        htm_data[79]=((6000)>>8); // 60kW
+        htm_data[78]=(2099)&0xFF;  // discharge ability of battery
+        htm_data[79]=((2099)>>8); // 20.99kW, 0x0833, 51, 8. Decimal values low byte, high byte
 
-        htm_data[86]=137; //from start up
-        htm_data[88]=137; //221 on start
-
-        //checksum
+        htm_data[86]=201; //137 at startup and in park from logs
+        htm_data[88]=222; //
+        //Counter / checksum
         if(++frame_count & 0x01)
         {
             //b94_count++;
