@@ -594,9 +594,8 @@ void GS450HClass::Task1Ms()
         //speed feedback
         speedSum=mg2_speed+mg1_speed;
         speedSum/=113;
-        //Possibly not needed
-        //uint8_t speedSum2=speedSum;
-        //htm_data[0]=speedSum2;
+        speedSum2=speedSum;
+        htm_data[0]=speedSum2;
 
         //these bytes are used, and seem to be MG1 for startup, but can't work out the relatino to the
         //bytes earlier in the stream, possibly the byte order has been flipped on these 2 bytes
@@ -645,7 +644,7 @@ void GS450HClass::Task1Ms()
         htm_data[72]=40;
         htm_data[73]=4;
         htm_data[74]=75;
-        htm_data[75]=12;
+        htm_data[75]=33;
 
         htm_data[76]=(-2490)&0xFF;  // regen ability of battery
         htm_data[77]=((-2490)>>8); // -24.9kW, 0xF646, 70, 246
