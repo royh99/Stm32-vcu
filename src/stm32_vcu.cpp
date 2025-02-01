@@ -20,6 +20,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+ 
 #include <stdint.h>
 #include <libopencm3/stm32/usart.h>
 #include <libopencm3/stm32/timer.h>
@@ -443,10 +444,10 @@ static void Ms100Task(void)
     {
         Param::SetInt(Param::HeatReq,IOMatrix::GetPin(IOMatrix::HEATREQ)->Get());
     }
-
+    #ifndef F105
     DigiPot::SetPot1Step(); //just for dev
     DigiPot::SetPot2Step(); //just for dev
-
+    #endif
     //Cooling Fan Control//
     if(opmode==MOD_CHARGE || opmode==MOD_RUN)
     {
@@ -1048,10 +1049,12 @@ void Param::Change(Param::PARAM_NUM paramNum)
         canInterface[0]->ClearUserMessages();
         canInterface[1]->ClearUserMessages();
         break;
+    #ifndef F105
     case Param::CAN3Speed:
         CANSPI_Initialize();// init the MCP25625 on CAN3
         CANSPI_ENRx_IRQ();  //init CAN3 Rx IRQ
         break;
+    #endif    
     case Param::Tim3_Presc:
     case Param::Tim3_Period:
     case Param::Tim3_1_OC:
@@ -1215,21 +1218,49 @@ extern "C" int main(void)
     clock_setup();
     rtc_setup();
     ConfigureVariantIO();
+    
+    #ifndef F105
     gpio_primary_remap(AFIO_MAPR_SWJ_CFG_JTAG_OFF_SW_ON, AFIO_MAPR_CAN2_REMAP | AFIO_MAPR_TIM1_REMAP_FULL_REMAP);//32f107
+    #else
+    gpio_primary_remap(AFIO_MAPR_SWJ_CFG_JTAG_OFF_SW_ON, 0);//32F105   
+    #endif
+    
+    #ifndef F105 
     usart2_setup();//TOYOTA HYBRID INVERTER INTERFACE
+    #endif
+    
     nvic_setup();
     parm_load();
+    
+    #ifndef F105
     spi2_setup();
     spi3_setup();
+    #endif
+    
     tim3_setup(); //For general purpose PWM output
     Param::Change(Param::PARAM_LAST);
     DigIo::inv_out.Clear();//inverter power off during bootup
+    
+    #ifdef F105
     DigIo::mcp_sby.Clear();//enable can3
-
+    #endif
+    
     Terminal t(USART3, TermCmds);
+    #ifdef F105
+    usart_set_baudrate(USART3, 921600); // overwrite 115200 baud rate in terminal initialisation
+    usart_set_stopbits(USART3, USART_STOPBITS_1);  
+    #endif
+    
+    
 //   FunctionPointerCallback canCb(CanCallback, SetCanFilters);
     Stm32Can c(CAN1, CanHardware::Baud500);
+    
+    #ifndef F105
     Stm32Can c2(CAN2, CanHardware::Baud500, true);
+    #else
+    Stm32Can c2(CAN2, CanHardware::Baud500, false);  
+    #endif
+    
     FunctionPointerCallback cb(CanCallback, SetCanFilters);
     Stm32Can *CanMapDev = &c;
     if (Param::GetInt(Param::CanMapCan) == 0)
@@ -1256,10 +1287,12 @@ extern "C" int main(void)
     CanHardware* shunt_can = canInterface[Param::GetInt(Param::ShuntCan)];
 
     canOBD2.SetCanInterface(canInterface[Param::GetInt(Param::OBD2Can)]);
-
+    
+    #ifndef F105 
     CANSPI_Initialize();// init the MCP25625 on CAN3
     CANSPI_ENRx_IRQ();  //init CAN3 Rx IRQ
-
+    #endif
+    
     LinBus l(USART1, 19200);
     lin = &l;
 

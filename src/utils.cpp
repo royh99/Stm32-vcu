@@ -593,31 +593,28 @@ void GS450hOilPump(uint16_t pumpdc)
 {
     if(Param::GetInt(Param::PumpPWM) == 0)//If Pump PWM out is set to Oil Pump
     {
+        uint16_t pumpduty =0;
         if(pumpdc>9)
         {
-            pumpdc = utils::change(pumpdc, 10, 80, 1875, 425); //map oil pump pwm to timer
-            pumpdc = pumpdc * 0.5;//Scalar increase 2x so duty is period is halved and so is DC.
+            pumpduty = utils::change(pumpdc, 10, 80, 1875, 425); //map oil pump pwm to timer
+            pumpduty = pumpduty * 0.5;//Scalar increase 2x so duty is period is halved and so is DC.
         }
-        else
-        {
-            pumpdc =0;
-        }
-        timer_set_oc_value(TIM1, TIM_OC1, pumpdc);//duty. 1000 = 52% , 500 = 76% , 1500=28%
+        timer_set_oc_value(TIM1, TIM_OC1, pumpduty);//duty. 1000 = 52% , 500 = 76% , 1500=28%
     }
 
-    uint16_t pumpduty = (pumpdc*66)-16;
+    uint16_t pumpduty = pumpdc*65.4;
 
     if(Param::GetInt(Param::PWM1Func) == IOMatrix::GS450HOIL)
     {
-        timer_set_oc_value(TIM3, TIM_OC1,pumpduty);//No duty set here
+        timer_set_oc_value(TIM3, TIM_OC1,pumpduty);// duty set here
     }
     if(Param::GetInt(Param::PWM2Func) == IOMatrix::GS450HOIL)
     {
-        timer_set_oc_value(TIM3, TIM_OC2,pumpduty);//No duty set here
+        timer_set_oc_value(TIM3, TIM_OC2,pumpduty);// duty set here
     }
     if(Param::GetInt(Param::PWM3Func) == IOMatrix::GS450HOIL)
     {
-        timer_set_oc_value(TIM3, TIM_OC3,pumpduty);//No duty set here
+        timer_set_oc_value(TIM3, TIM_OC3,pumpduty);// duty set here
     }
 }
 
