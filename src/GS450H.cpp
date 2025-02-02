@@ -331,12 +331,12 @@ void GS450HClass::GS450Hgear()//!!! should be ran every 10ms - ran before calcul
 
 void GS450HClass::GS450Houtput()//!!! should be ran every 10ms
 {
-/*     if (Param::GetInt(Param::opmode) == MOD_OFF)
+    if (Param::GetInt(Param::opmode) == MOD_OFF)
     {
         utils::GS450hOilPump(0);
-    } */
+    }
 
-    //if (Param::GetInt(Param::opmode) == MOD_RUN)
+    if (Param::GetInt(Param::opmode) == MOD_RUN)
     {
         Param::SetInt(Param::Gear1,DigIo::gear1_in.Get());//update web interface with status of gearbox PB feedbacks for diag purposes.
         Param::SetInt(Param::Gear2,DigIo::gear2_in.Get());
