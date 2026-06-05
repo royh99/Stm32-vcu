@@ -362,7 +362,7 @@ static void Ms200Task(void) {
       }
     }
   } else {
-    IOMatrix::GetPinOut(IOMatrix::BRAKEVACPUMP)->Clear();
+   // IOMatrix::GetPinOut(IOMatrix::BRAKEVACPUMP)->Clear();
   }
 
   preheater.Task200Ms(opmode, hours, minutes);
@@ -823,7 +823,7 @@ static void Ms10Task(void) {
     ErrorMessage::UnpostAll();
     if (!chargeMode) {
       opmode = MOD_OFF;
-      rlyDly = 250; // Recharge sequence timer for delayed shutdown
+      rlyDly = 300; // Recharge sequence timer for delayed shutdown
     }
     Param::SetInt(Param::opmode, opmode);
     break;
@@ -840,7 +840,7 @@ static void Ms10Task(void) {
     ErrorMessage::UnpostAll();
     if (!selectedVehicle->Ready()) {
       opmode = MOD_OFF;
-      rlyDly = 250; // Recharge sequence timer for delayed shutdown
+      rlyDly = 300; // Recharge sequence timer for delayed shutdown
     }
     Param::SetInt(Param::opmode, opmode);
     break;
@@ -856,7 +856,7 @@ static void Ms10Task(void) {
     preheater.Ms10Task();
 
     if (!preheater.GetRunPreHeat()) {
-      rlyDly = 250; // Recharge sequence timer for delayed shutdown
+      rlyDly = 300; // Recharge sequence timer for delayed shutdown
     }
     break;
   }
