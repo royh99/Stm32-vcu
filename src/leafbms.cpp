@@ -49,8 +49,7 @@ void LeafBMS::DecodeCAN(int id, uint8_t *data) {
       break;
     }
     float cur = uint16_t(bytes[0] << 3) + uint16_t(bytes[1] >> 5);
-    if (cur > 1023)
-    {
+    if (cur > 1023) {
       cur -= 2047; // check if negative
     }
     uint16_t udc = uint16_t(bytes[2] << 2) + uint16_t(bytes[3] >> 6);
@@ -66,12 +65,11 @@ void LeafBMS::DecodeCAN(int id, uint8_t *data) {
       {
         Param::SetFloat(Param::udc2, BattVoltage);
       }
-      if (BattVoltage > 200)
-      {
-        Param::SetFloat(Param::udcsw,BattVoltage-20);
+      if (BattVoltage > 200) {
+        Param::SetFloat(Param::udcsw,BattVoltage - 20);
         // Set for precharging based on actual voltage
       }
-      float kw =(BattVoltage * BattCur) /1000; 
+      float kw = (BattVoltage * BattCur) / 1000; 
       // calculate power and post to parameter database
       Param::SetFloat(Param::power, kw);
     }
