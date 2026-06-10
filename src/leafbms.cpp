@@ -56,8 +56,8 @@ void LeafBMS::DecodeCAN(int id, uint8_t *data) {
     // bool interlock = (bytes[3] & (1 << 3)) >> 3;
     // bool full = (bytes[3] & (1 << 4)) >> 4;
     
-    if (Param::GetInt(Param::ShuntType) == 0) { // Only populate if 
-                                                //no shunt is used
+    if (Param::GetInt(Param::ShuntType) == 0) { 
+      // Only populate if no shunt is used
       float BattCur = cur / 2;
       float BattVoltage = udc / 2;
       Param::SetFloat(Param::idc, BattCur);
