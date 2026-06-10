@@ -376,9 +376,10 @@ float ProcessUdc(int motorSpeed) {
     Param::SetFloat(Param::deltaV, deltaVolts1);
     if (Param::GetInt(Param::ShuntType) == 4) // ISA Shunt with udcsw update
     {
-      if (udc2 > Param::GetFloat(Param::udcmin)) // only update UDCsw if UDC2 is above udcmin
-      {
-        Param::SetFloat(Param::udcsw,udc2 - 20); // Set udcsw to 20V under battery voltage
+      if (udc2 > Param::GetFloat(Param::udcmin)) {
+        // only update UDCsw if UDC2 is above udcmin
+        Param::SetFloat(Param::udcsw, udc2 - 20); 
+        // Set udcsw to 20V under battery voltage
       }
     }
   } else if (Param::GetInt(Param::ShuntType) == 2) // BMS Sbox
@@ -392,9 +393,10 @@ float ProcessUdc(int motorSpeed) {
           ((float)SBOX::Voltage) / 1000; // get battery voltage from sbox sensor
                                          // and post to parameter database
       Param::SetFloat(Param::udc2, udc2);
-      if (udc2 >Param::GetFloat(Param::udcmin)) // only update UDCsw if UDC2 is above udcmin
-      {
-        Param::SetFloat(Param::udcsw,udc2 - 20); // Set udcsw to 20V under battery voltage
+      if (udc2 > Param::GetFloat(Param::udcmin)) {
+        // only update UDCsw if UDC2 is above udcmin
+        Param::SetFloat(Param::udcsw, udc2 - 20); 
+        // Set udcsw to 20V under battery voltage
       }
     } else {
       Param::SetFloat(Param::udc, 0);
