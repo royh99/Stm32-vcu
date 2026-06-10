@@ -377,7 +377,7 @@ float ProcessUdc(int motorSpeed) {
     if (Param::GetInt(Param::ShuntType) == 4) // ISA Shunt with udcsw update
     {
       if (udc2 > Param::GetFloat(Param::udcmin)) 
-        // only update UDCsw if UDC2 is above udcmin
+      // only update UDCsw if UDC2 is above udcmin
       {
         Param::SetFloat(Param::udcsw,udc2 - 20); 
         // Set udcsw to 20V under battery voltage
@@ -395,7 +395,7 @@ float ProcessUdc(int motorSpeed) {
                                          // and post to parameter database
       Param::SetFloat(Param::udc2, udc2);
       if (udc2 >Param::GetFloat(Param::udcmin)) 
-        // only update UDCsw if UDC2 is above udcmin
+      // only update UDCsw if UDC2 is above udcmin
       {
         Param::SetFloat(Param::udcsw,udc2 - 20); 
         // Set udcsw to 20V under battery voltage
