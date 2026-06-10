@@ -56,7 +56,7 @@ void LeafBMS::DecodeCAN(int id, uint8_t *data) {
     // bool interlock = (bytes[3] & (1 << 3)) >> 3;
     // bool full = (bytes[3] & (1 << 4)) >> 4;
 
-    if (Param::GetInt(Param::ShuntType)==0) 
+    if (Param::GetInt(Param::ShuntType) == 0) 
     // Only populate if no shunt is used
     {
       float BattCur = cur / 2;
@@ -77,7 +77,7 @@ void LeafBMS::DecodeCAN(int id, uint8_t *data) {
   }
   case 0x1DC: {
     if (isMessageCorrupt(bytes)) {
-    // Message content malformed, abort reading data from it! Raise flag!
+      // Message content malformed, abort reading data from it! Raise flag!
       break;
     }
     float dislimit = uint16_t(bytes[0] << 2) + uint16_t(bytes[1] >> 6);
