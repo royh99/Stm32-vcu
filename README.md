@@ -5,7 +5,10 @@
 Project based on the OpenInverter System by Johannes Huebner to provide a universal VCU (Vehicle Control Unit) for electric vehicle conversion projects. 
 
 Please visit the development thread on the Openinverter Forum for more information : https://openinverter.org/forum/viewtopic.php?f=3&t=1277
-![Screenshot from 2025-01-28 14-17-28](https://github.com/user-attachments/assets/ff066c9e-8c79-470d-aa04-bc3b34198900)
+<img width="1723" height="960" alt="Zom_V1_3" src="https://github.com/user-attachments/assets/9656c54d-8c9a-453b-ab94-809dc201deae" />
+
+
+V1.3 Hardware now released. PDFs and Gerber here on Github, full Kicad 9 design is on Patreon at the 10Eur level.
 
 ## Videos on progress
 
@@ -22,13 +25,14 @@ V2.20A now available : https://www.youtube.com/watch?v=wjlucUWX_lc
 # Supported components
 
 - Nissan Leaf Gen1/2/3 inverter via CAN
-- Nissan Leaf Gen2 PDM (Charger and DCDC)
+- Nissan Leaf Gen1/2/3 PDM (Charger and DCDC)
 - Nissan LEAF Battery (all variants)
 - Mitsubishi Outlander Support
 - Mitsubishi Outlander drivetrain (front and rear motors/inverters) Support
 - Modular BMS / SimpBMS Support
 - OpenInverter CAN Support
 - CCS DC fast charge via BMW i3 LIM
+- CCS DC fast charging via FOCCCI https://github.com/uhi22/ccs32clara
 - Chademo DC fast charge
 - ISA Shunt / BMW SBOX / VW EBOX supported via CAN
 - Lexus GS450H inverter / gearbox via sync serial
@@ -46,6 +50,10 @@ V2.20A now available : https://www.youtube.com/watch?v=wjlucUWX_lc
 - OBD2 Can support
 - TESLA Gen 2 DCDC Converter Can support
 
+
+# Contributing
+
+Information on how to contribute to this open source project can be found [Contributing Guide](./CONTRIBUTING.md)
 
 # Compiling
 You will need the arm-none-eabi toolchain: https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads
@@ -86,3 +94,5 @@ March 24 : V1.1 Hardware and V2.05A firmware now running in 3 vehicles :
 -BMW E31 with Tesla LDU Drivetrain, Tesla DCDC, ISA Shunt , Chademo Fast Charge
 
 All hardware / software is tested in these vehicles before release. More vehicles with different configuration in progress to ensure as much testing as possible.
+
+Apr 26 : Added Zombie Relay box V1 full kicad project to hardware directory.
