@@ -42,11 +42,11 @@
  * Start clocks of all needed peripherals
  */
 void clock_setup(void) {
-#ifndef F105
-rcc_clock_setup_pll(&rcc_hse_configs[RCC_CLOCK_HSE8_72MHZ]); 
-#else 
-rcc_clock_setup_pll(&rcc_hse_configs[RCC_CLOCK_HSE16_72MHZ]);
-#endif
+  #ifndef F105
+  rcc_clock_setup_pll(&rcc_hse_configs[RCC_CLOCK_HSE8_72MHZ]);
+  #else 
+  rcc_clock_setup_pll(&rcc_hse_configs[RCC_CLOCK_HSE16_72MHZ]);
+  #endif
 
   rcc_set_adcpre(RCC_CFGR_ADCPRE_PCLK2_DIV6);
 
@@ -131,11 +131,13 @@ void usart2_setup(void) {
  * Enable Timer refresh and break interrupts
  */
 void nvic_setup(void) {
+  #ifndef F105
   nvic_enable_irq(NVIC_DMA1_CHANNEL7_IRQ);
   nvic_set_priority(NVIC_DMA1_CHANNEL7_IRQ, 0xf0); // usart2_TX
 
   nvic_enable_irq(NVIC_DMA1_CHANNEL6_IRQ);
   nvic_set_priority(NVIC_DMA1_CHANNEL6_IRQ, 0xf0); // usart2_RX low priority int
+  #endif
 
   // nvic_enable_irq(NVIC_DMA1_CHANNEL3_IRQ);
   // nvic_set_priority(NVIC_DMA1_CHANNEL3_IRQ, 0x20);//usart3_RX high priority
@@ -151,84 +153,26 @@ void nvic_setup(void) {
   nvic_enable_irq(NVIC_USB_HP_CAN_TX_IRQ);             // CAN TX
   nvic_set_priority(NVIC_USB_HP_CAN_TX_IRQ, 0xe << 4); // second lowest priority
 
+#ifndef F105
   /* Enable MCP2526 IRQ on PE15 */
   nvic_enable_irq(NVIC_EXTI15_10_IRQ);
   exti_enable_request(EXTI15);
   exti_set_trigger(EXTI15, EXTI_TRIGGER_FALLING);
-  exti_select_source(EXTI15, GPIOE);
+  exti_select_source(EXTI15,GPIOE);
+  #endif
   /* Without this the RTC interrupt routine will never be called. */
   nvic_enable_irq(NVIC_RTC_IRQ);
   nvic_set_priority(NVIC_RTC_IRQ, 0x20);
 }
 
-<<<<<<< HEAD
-/**
-* Enable Timer refresh and break interrupts
-*/
-void nvic_setup(void)
-{
-   
-    #ifndef F105
-    nvic_enable_irq(NVIC_DMA1_CHANNEL7_IRQ);
-    nvic_set_priority(NVIC_DMA1_CHANNEL7_IRQ, 0xf0);//usart2_TX
-
-    nvic_enable_irq(NVIC_DMA1_CHANNEL6_IRQ);
-    nvic_set_priority(NVIC_DMA1_CHANNEL6_IRQ, 0xf0);//usart2_RX low priority int
-    #endif
-
-    // nvic_enable_irq(NVIC_DMA1_CHANNEL3_IRQ);
-    //nvic_set_priority(NVIC_DMA1_CHANNEL3_IRQ, 0x20);//usart3_RX high priority int
-
-    nvic_enable_irq(NVIC_TIM4_IRQ); //Scheduler on tim4
-    nvic_set_priority(NVIC_TIM4_IRQ, 0); //Highest priority
-
-    nvic_enable_irq(NVIC_USB_LP_CAN_RX0_IRQ); //CAN RX
-    nvic_set_priority(NVIC_USB_LP_CAN_RX0_IRQ, 0xe << 4); //second lowest priority
-
-    nvic_enable_irq(NVIC_USB_HP_CAN_TX_IRQ); //CAN TX
-    nvic_set_priority(NVIC_USB_HP_CAN_TX_IRQ, 0xe << 4); //second lowest priority
-    #ifndef F105
-    /* Enable MCP2526 IRQ on PE15 */
-    nvic_enable_irq(NVIC_EXTI15_10_IRQ);
-    exti_enable_request(EXTI15);
-    exti_set_trigger(EXTI15, EXTI_TRIGGER_FALLING);
-    exti_select_source(EXTI15,GPIOE);
-    #endif
-    /* Without this the RTC interrupt routine will never be called. */
-    nvic_enable_irq(NVIC_RTC_IRQ);
-    nvic_set_priority(NVIC_RTC_IRQ, 0x20);
-
-}
-
-void rtc_setup()
-{
-    //Base clock is HSE/128 = 8MHz/128 = 62.5kHz
-    //62.5kHz / (62499 + 1) = 1Hz
-    #ifndef F105
-    rtc_auto_awake(RCC_HSE, 62499); //1s tick
-    #else  
-    rtc_auto_awake(RCC_HSE, 124999); //1s tick form 16MHz
-    #endif
-    rtc_set_counter_val(0);
-    //* Enable the RTC interrupt to occur off the SEC flag.
-    rtc_clear_flag(RTC_SEC);
-    rtc_interrupt_enable(RTC_SEC);
-}
-
-void tim_setup()
-{
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    //Code for timer 1
-    //oil pump control pwm for Toyota hybrid gearbox Needs to be 1kHz
-    //Variable frequency output
-    ////////////////////////////////////////////////////////////////////////
-    gpio_set_mode(GPIOE,GPIO_MODE_OUTPUT_2_MHZ,	// Low speed (only need 1kHz)
-                  GPIO_CNF_OUTPUT_ALTFN_PUSHPULL,GPIO9);	// GPIOE9=TIM1.CH1 Alt
-=======
 void rtc_setup() {
   // Base clock is HSE/128 = 8MHz/128 = 62.5kHz
   // 62.5kHz / (62499 + 1) = 1Hz
+  #ifndef F105
   rtc_auto_awake(RCC_HSE, 62499); // 1s tick
+  #else  
+  rtc_auto_awake(RCC_HSE, 124999); // 1s tick form 16MHz
+  #endif
   rtc_set_counter_val(0);
   //* Enable the RTC interrupt to occur off the SEC flag.
   rtc_clear_flag(RTC_SEC);
@@ -265,7 +209,6 @@ void tim2_setup() {
   gpio_set_mode(GPIOA, GPIO_MODE_OUTPUT_50_MHZ, // High speed
                 GPIO_CNF_OUTPUT_ALTFN_PUSHPULL,
                 GPIO1); // GPIOA1=TIM2.CH2 clock for usart2
->>>>>>> master
 
   // TIM2:
   timer_disable_counter(TIM2);
@@ -325,16 +268,6 @@ void tim3_setup() {
     DigIo::PWM2.Configure(GPIOA, GPIO7, PinMode::OUTPUT);
   }
 
-<<<<<<< HEAD
-    timer_set_mode(TIM2,
-                   TIM_CR1_CKD_CK_INT,
-                   TIM_CR1_CMS_EDGE,
-                   TIM_CR1_DIR_UP);
-    timer_set_prescaler(TIM2,0);
-    timer_enable_preload(TIM2);
-    timer_continuous_mode(TIM2);
-    timer_set_period(TIM2,143);//500kHz
-=======
   /// PWM1
   if (Param::GetInt(Param::PWM1Func) == IOMatrix::PWM_TIM3) {
     gpio_set_mode(GPIOA, GPIO_MODE_OUTPUT_2_MHZ, // Low speed (only need 1khz)
@@ -349,7 +282,6 @@ void tim3_setup() {
   } else {
     DigIo::PWM1.Configure(GPIOA, GPIO6, PinMode::OUTPUT);
   }
->>>>>>> master
 
   timer_disable_counter(TIM3);
   // edge aligned PWM
@@ -363,132 +295,6 @@ void tim3_setup() {
   timer_enable_oc_preload(TIM3, TIM_OC2);
   timer_enable_oc_preload(TIM3, TIM_OC3);
 
-<<<<<<< HEAD
-    timer_set_oc_value(TIM2,TIM_OC2,72);//50% duty
-    timer_enable_counter(TIM2);
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-}
-
-
-void tim3_setup()
-{
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    // Setup all 3 PWM ports to output a 1khz 50% duty cycle PWM signal
-    // General purpose pwm output. Push/pull driven to +12v/gnd. Timer 3 Chan 3 PB0.
-    // General purpose pwm output. Push/pull driven to +12v/gnd. Timer 3 Chan 2 PA7.
-    // General purpose pwm output. Push/pull driven to +12v/gnd. Timer 3 Chan 1 PA6.
-    ////////////////////////////////////////////////////////////////////////
-    bool CPspoofPres = 0;
-    bool GS450hOil = 0;
-///PWM3
-    if (Param::GetInt(Param::PWM3Func) == IOMatrix::PWM_TIM3)
-    {
-        gpio_set_mode(GPIOB,GPIO_MODE_OUTPUT_2_MHZ,	// Low speed (only need 1khz)
-                      GPIO_CNF_OUTPUT_ALTFN_PUSHPULL,GPIO0);	// GPIOB0=TIM3.CH3
-    }
-    else if (Param::GetInt(Param::PWM3Func) == IOMatrix::CP_SPOOF)
-    {
-        gpio_set_mode(GPIOB,GPIO_MODE_OUTPUT_2_MHZ,	// Low speed (only need 1khz)
-                      GPIO_CNF_OUTPUT_ALTFN_PUSHPULL,GPIO0);	// GPIOB0=TIM3.CH3
-        CPspoofPres = 1; //Running CP Spoof
-    }
-    else if (Param::GetInt(Param::PWM3Func) == IOMatrix::GS450HOIL)
-    {
-        gpio_set_mode(GPIOB,GPIO_MODE_OUTPUT_2_MHZ,	// Low speed (only need 1khz)
-                      GPIO_CNF_OUTPUT_ALTFN_PUSHPULL,GPIO0);	// GPIOB0=TIM3.CH3
-        GS450hOil = 1; //Running GS450h Oil Pump
-    }
-    else
-    {
-        DigIo::PWM3.Configure(GPIOB,GPIO0,PinMode::OUTPUT);
-    }
-
-    ///PWM2
-    if (Param::GetInt(Param::PWM2Func) == IOMatrix::PWM_TIM3)
-    {
-        gpio_set_mode(GPIOA,GPIO_MODE_OUTPUT_2_MHZ,	// Low speed (only need 1khz)
-                      GPIO_CNF_OUTPUT_ALTFN_PUSHPULL,GPIO7);	// GPIOE9=TIM3.CH2
-    }
-    else if (Param::GetInt(Param::PWM2Func) == IOMatrix::CP_SPOOF)
-    {
-        gpio_set_mode(GPIOA,GPIO_MODE_OUTPUT_2_MHZ,	// Low speed (only need 1khz)
-                      GPIO_CNF_OUTPUT_ALTFN_PUSHPULL,GPIO7);	// GPIOE9=TIM3.CH2
-        CPspoofPres = 1; //Running CP Spoof
-    }
-    else if (Param::GetInt(Param::PWM2Func) == IOMatrix::GS450HOIL)
-    {
-        gpio_set_mode(GPIOA,GPIO_MODE_OUTPUT_2_MHZ,	// Low speed (only need 1khz)
-                      GPIO_CNF_OUTPUT_ALTFN_PUSHPULL,GPIO7);	// GPIOE9=TIM3.CH2
-        GS450hOil = 1; //Running GS450h Oil Pump
-    }
-    else
-    {
-        DigIo::PWM2.Configure(GPIOA,GPIO7,PinMode::OUTPUT);
-    }
-
-    ///PWM1
-    if (Param::GetInt(Param::PWM1Func) == IOMatrix::PWM_TIM3)
-    {
-        gpio_set_mode(GPIOA,GPIO_MODE_OUTPUT_2_MHZ,	// Low speed (only need 1khz)
-                      GPIO_CNF_OUTPUT_ALTFN_PUSHPULL,GPIO6);	// GPIOA6=TIM3.CH1
-    }
-    else if (Param::GetInt(Param::PWM1Func) == IOMatrix::CP_SPOOF)
-    {
-        gpio_set_mode(GPIOA,GPIO_MODE_OUTPUT_2_MHZ,	// Low speed (only need 1khz)
-                      GPIO_CNF_OUTPUT_ALTFN_PUSHPULL,GPIO6);	// GPIOA6=TIM3.CH1
-        CPspoofPres = 1; //Running CP Spoof
-    }
-    else if (Param::GetInt(Param::PWM1Func) == IOMatrix::GS450HOIL)
-    {
-        gpio_set_mode(GPIOA,GPIO_MODE_OUTPUT_2_MHZ,	// Low speed (only need 1khz)
-                      GPIO_CNF_OUTPUT_ALTFN_PUSHPULL,GPIO6);	// GPIOA6=TIM3.CH1
-        GS450hOil = 1; //Running GS450h Oil Pump
-    }
-    else
-    {
-        DigIo::PWM1.Configure(GPIOA,GPIO6,PinMode::OUTPUT);
-    }
-
-    timer_disable_counter(TIM3);
-    //edge aligned PWM
-    timer_set_alignment(TIM3, TIM_CR1_CMS_EDGE);
-    timer_enable_preload(TIM3);
-    /* PWM mode 1 and preload enable */
-    timer_set_oc_mode(TIM3, TIM_OC1, TIM_OCM_PWM1);
-    timer_set_oc_mode(TIM3, TIM_OC2, TIM_OCM_PWM1);
-    timer_set_oc_mode(TIM3, TIM_OC3, TIM_OCM_PWM1);
-    timer_enable_oc_preload(TIM3, TIM_OC1);
-    timer_enable_oc_preload(TIM3, TIM_OC2);
-    timer_enable_oc_preload(TIM3, TIM_OC3);
-
-    timer_set_oc_polarity_high(TIM3, TIM_OC1);
-    timer_set_oc_polarity_high(TIM3, TIM_OC2);
-    timer_set_oc_polarity_high(TIM3, TIM_OC3);
-    timer_enable_oc_output(TIM3, TIM_OC1);
-    timer_enable_oc_output(TIM3, TIM_OC2);
-    timer_enable_oc_output(TIM3, TIM_OC3);
-
-    if (CPspoofPres == 0 && GS450hOil == 0) //No CP Spoof Selected or GS450h Oil pump
-    {
-        timer_set_period(TIM3, Param::GetInt(Param::Tim3_Period));
-        timer_set_oc_value(TIM3, TIM_OC1, Param::GetInt(Param::Tim3_1_OC));
-        timer_set_oc_value(TIM3, TIM_OC2, Param::GetInt(Param::Tim3_2_OC));
-        timer_set_oc_value(TIM3, TIM_OC3, Param::GetInt(Param::Tim3_3_OC));
-        timer_generate_event(TIM3, TIM_EGR_UG);
-        timer_set_prescaler(TIM3,Param::GetInt(Param::Tim3_Presc));
-        timer_enable_counter(TIM3);
-    }
-    else //CP Spoof or GS450h Oil pump output selected locks TIM3 Force 1khz clock (996hz)
-    {
-        timer_set_period(TIM3, 6540);
-        timer_set_oc_value(TIM3, TIM_OC1, 0);//No duty set here
-        timer_set_oc_value(TIM3, TIM_OC2, 0);//No duty set here
-        timer_set_oc_value(TIM3, TIM_OC3, 0);//No duty set here
-        timer_generate_event(TIM3, TIM_EGR_UG);
-        timer_set_prescaler(TIM3,10);
-        timer_enable_counter(TIM3);
-    }
-=======
   timer_set_oc_polarity_high(TIM3, TIM_OC1);
   timer_set_oc_polarity_high(TIM3, TIM_OC2);
   timer_set_oc_polarity_high(TIM3, TIM_OC3);
@@ -522,5 +328,4 @@ void tim3_setup()
     timer_set_prescaler(TIM3, 17);
     timer_enable_counter(TIM3);
   }
->>>>>>> master
 }
